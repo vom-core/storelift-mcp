@@ -72,7 +72,7 @@ No dependencies — a single file speaking JSON-RPC over stdio. Runs with
 
 ## Registry
 
-Published to the official MCP Registry as `io.github.vom-core/storelift`.
+Published to the official MCP Registry as `net.storelift/storelift`.
 The manifest is [`server.json`](./server.json) in this repo.
 
 ## Source
