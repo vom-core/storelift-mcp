@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.vom-core/storelift",
+  "description": "App Store & Google Play keyword ranks, rivals and AI visibility as an MCP server",
+  "repository": {
+    "url": "https://github.com/vom-core/storelift-mcp",
+    "source": "github"
+  },
+  "version": "1.0.4",
+  "websiteUrl": "https://storelift.net",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "storelift-mcp",
+      "version": "1.0.4",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "STORELIFT_API_KEY",
+          "description": "Storelift API key (Studio plan). Generate at Storelift -> Settings -> API keys.",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "STORELIFT_API",
+          "description": "Override the API base URL. Defaults to https://storelift.net",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

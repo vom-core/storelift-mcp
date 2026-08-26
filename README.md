@@ -70,6 +70,11 @@ single measurement.
 No dependencies — a single file speaking JSON-RPC over stdio. Runs with
 `node index.mjs` just as well as through `npx`.
 
+## Registry
+
+Published to the official MCP Registry as `io.github.vom-core/storelift`.
+The manifest is [`server.json`](./server.json) in this repo.
+
 ## Source
 
 [github.com/vom-core/storelift-mcp](https://github.com/vom-core/storelift-mcp) —

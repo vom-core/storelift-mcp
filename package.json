@@ -1,6 +1,7 @@
 {
   "name": "storelift-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
+  "mcpName": "io.github.vom-core/storelift",
   "description": "App Store & Google Play keyword ranks, rivals and AI visibility as an MCP server",
   "type": "module",
   "bin": {
