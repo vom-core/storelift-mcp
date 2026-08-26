@@ -1,0 +1,179 @@
+#!/usr/bin/env node
+// Storelift MCP sunucusu.
+//
+// NE İŞE YARIYOR: Claude (ya da MCP konuşan başka bir istemci) uygulamanın
+// sıralarını, rakiplerini ve AI görünürlüğünü DOĞRUDAN okuyabiliyor.
+// "Kelimece'nin TR'de düşen kelimeleri hangileri" diye sorup cevabı panoya
+// bakmadan alıyorsun.
+//
+// KURULUM (Claude Desktop → claude_desktop_config.json):
+//   {
+//     "mcpServers": {
+//       "storelift": {
+//         "command": "npx",
+//         "args": ["-y", "storelift-mcp"],
+//         "env": { "STORELIFT_API_KEY": "sl_live_..." }
+//       }
+//     }
+//   }
+//
+// BAĞIMLILIK YOK: stdio üzerinden JSON-RPC elle konuşuluyor. Tek dosya, npm
+// kurulumu gerektirmeden `node index.mjs` ile de çalışır.
+
+import { createRequire } from "node:module";
+
+const BASE = process.env.STORELIFT_API || "https://storelift.net";
+const KEY = process.env.STORELIFT_API_KEY;
+// Sürüm TEK YERDEN: elle yazılan serverInfo.version, package.json 1.0.1'e
+// çıkınca 1.0.0'da kalıp istemciye yanlış sürüm bildiriyordu.
+const { version: VERSION } = createRequire(import.meta.url)("./package.json");
+
+// DIŞA DÖNÜK METİNLER İNGİLİZCE. Kod yorumları Türkçe (depo dili), ama araç
+// açıklamaları ve hata metinleri MCP dizinlerinde ve yabancı bir kullanıcının
+// araç panelinde görünüyor — orada Türkçe, ürünü küçültür.
+if (!KEY) {
+  // ⚠️ PLAN DA YAZILIYOR. Eski metin yalnız "Settings → API keys" diyordu;
+  // Public API STUDIO'ya açık (api/index.mjs › PLANS: free/pro `api: false`).
+  // Ücretsiz plandaki biri o yönergeyi izleyip anahtar üretemeyince paketi
+  // bozuk sanıyordu — README plan şartını söylüyordu ama çalışan program
+  // söylemiyordu, ve kullanıcı README'yi değil hata metnini okuyor.
+  console.error(
+    "STORELIFT_API_KEY is not set.\n" +
+    "Generate one at Storelift → Settings → API keys (requires the Studio plan).\n" +
+    "https://storelift.net/pricing"
+  );
+  process.exit(1);
+}
+
+/* Sunucunun hata KODLARI kısa ve makine için ("plan_required"). Model onu
+   olduğu gibi kullanıcıya anlatınca ortaya "ERROR: plan_required" çıkıyor ve
+   kimse ne yapacağını bilmiyor. En sık karşılaşılacak üç durum burada insan
+   cümlesine çevriliyor; çevrilmeyen kod olduğu gibi geçiyor (uydurma bir
+   açıklama, hiç açıklama olmamasından kötüdür). */
+const HATA_METNI = {
+  plan_required: "The Public API is available on the Studio plan. Upgrade at https://storelift.net/pricing",
+  invalid_api_key: "This API key is not valid. Generate a new one at Storelift → Settings → API keys.",
+  missing_api_key: "No API key was sent. Set STORELIFT_API_KEY in your MCP server config.",
+};
+
+async function api(path) {
+  const res = await fetch(BASE + path, { headers: { "x-api-key": KEY } });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(HATA_METNI[body.error] || body.error || `HTTP ${res.status}`);
+  return body;
+}
+
+const TOOLS = [
+  {
+    name: "list_apps",
+    description: "List the apps tracked in this Storelift account (id, name, countries, keywords). Call this first — every other tool needs an appId from here.",
+    inputSchema: { type: "object", properties: {} },
+    run: () => api("/v1/apps"),
+  },
+  {
+    name: "get_keywords",
+    description:
+      "Keyword ranks for one app in one App Store / Google Play country. THREE STATES ARE DISTINCT: measured=false means the query could not be measured, rank=null means it was measured but the app is absent from the top results, rank=<number> is the rank. Never collapse them into one — counting an unmeasured day as zero produces a false answer.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us (defaults to the app's first country)" },
+        platform: { type: "string", enum: ["ios", "android"], description: "defaults to ios" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/keywords?country=${a.country || ""}&platform=${a.platform || "ios"}`),
+  },
+  {
+    name: "get_rivals",
+    description:
+      "Apps that rank ABOVE this app in search. For each rival you get the keywords it beats you on, its rank there (theirRank) and yours (ourRank) — ourRank null means the app does not appear for that keyword at all.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+        platform: { type: "string", enum: ["ios", "android"], description: "defaults to ios" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/rivals?country=${a.country || ""}&platform=${a.platform || "ios"}`),
+  },
+  {
+    name: "get_ai_visibility",
+    description:
+      "Whether AI assistants name this app when asked natural questions about its category — reported per engine (Claude / ChatGPT / Gemini), never averaged. This is an OBSERVATION, not a ranking: a model's knowledge is frozen at a date and the answer is not identical every time, so read the trend rather than a single measurement.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/ai?country=${a.country || ""}`),
+  },
+  {
+    name: "get_history",
+    description: "Keyword rank history for one country. Series points are [day, rank]; a null rank means the app was absent from the top results that day, which is not the same as a bad rank.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/history?country=${a.country || ""}`),
+  },
+];
+
+const send = (msg) => process.stdout.write(JSON.stringify(msg) + "\n");
+const ok = (id, result) => send({ jsonrpc: "2.0", id, result });
+const err = (id, message) => send({ jsonrpc: "2.0", id, error: { code: -32000, message } });
+
+async function handle(req) {
+  const { id, method, params } = req;
+  if (method === "initialize") {
+    return ok(id, {
+      protocolVersion: "2024-11-05",
+      capabilities: { tools: {} },
+      serverInfo: { name: "storelift", version: VERSION },
+    });
+  }
+  if (method === "notifications/initialized") return; // bildirim, yanıt beklemez
+  if (method === "tools/list") {
+    return ok(id, { tools: TOOLS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });
+  }
+  if (method === "tools/call") {
+    const tool = TOOLS.find((t) => t.name === params?.name);
+    if (!tool) return err(id, `unknown tool: ${params?.name}`);
+    try {
+      const data = await tool.run(params.arguments || {});
+      return ok(id, { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] });
+    } catch (e) {
+      // Hata metni araca DÖNÜYOR, sessizce yutulmuyor: model "veri yok" ile
+      // "okuyamadım" arasındaki farkı görmezse yanlış sonuç anlatır.
+      return ok(id, { content: [{ type: "text", text: `ERROR: ${e.message}` }], isError: true });
+    }
+  }
+  if (id !== undefined) err(id, `unsupported method: ${method}`);
+}
+
+let buf = "";
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", async (chunk) => {
+  buf += chunk;
+  let i;
+  while ((i = buf.indexOf("\n")) >= 0) {
+    const line = buf.slice(0, i).trim();
+    buf = buf.slice(i + 1);
+    if (!line) continue;
+    try {
+      await handle(JSON.parse(line));
+    } catch {
+      /* bozuk satır yok sayılır — akış kapanmamalı */
+    }
+  }
+});

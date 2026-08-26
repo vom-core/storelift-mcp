@@ -1,0 +1,38 @@
+{
+  "name": "storelift-mcp",
+  "version": "1.0.2",
+  "description": "App Store & Google Play keyword ranks, rivals and AI visibility as an MCP server",
+  "type": "module",
+  "bin": {
+    "storelift-mcp": "index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "mcp-server",
+    "claude",
+    "aso",
+    "app-store-optimization",
+    "app-store",
+    "google-play",
+    "keyword-rank",
+    "ai-visibility"
+  ],
+  "homepage": "https://storelift.net",
+  "bugs": {
+    "email": "hello@vomcore.com"
+  },
+  "author": "Vomcore",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
