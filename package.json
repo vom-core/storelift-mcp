@@ -7,6 +7,9 @@
   "bin": {
     "storelift-mcp": "index.mjs"
   },
+  "scripts": {
+    "build": "node --check index.mjs"
+  },
   "files": [
     "index.mjs",
     "README.md",
