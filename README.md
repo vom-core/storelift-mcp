@@ -10,7 +10,7 @@ ranks are read from the public storefront.
 
 ## Requirements
 
-- A **Studio** plan (the Public API is enabled on that plan)
+- A **Pro** or **Studio** plan (the Public API is enabled on both)
 - An API key: Storelift → Settings → API keys → **Generate key**
 
 ## Install
@@ -35,6 +35,14 @@ Claude Desktop (`claude_desktop_config.json`):
 }
 ```
 
+Hosted, with nothing to install — `https://storelift.net/mcp` over Streamable
+HTTP, same key in an `Authorization: Bearer` header (no OAuth sign-in yet, so
+the client must let you set a header):
+
+```bash
+claude mcp add --transport http storelift https://storelift.net/mcp --header "Authorization: Bearer sl_live_..."
+```
+
 ## Tools
 
 | Tool | Returns |
@@ -44,6 +52,9 @@ Claude Desktop (`claude_desktop_config.json`):
 | `get_rivals` | apps ranking **above** you, with their rank and yours |
 | `get_ai_visibility` | whether assistants name your app, per engine (Claude / ChatGPT / Gemini) |
 | `get_history` | rank history, `[day, rank]` points |
+| `get_store_page` | your own listing signals + the Google Play page, with a dated change timeline |
+| `get_reviews` | recent App Store and Google Play reviews, and how many are new since last measurement |
+| `get_charts` | App Store chart position per list, with history |
 
 ## Reading the data
 
@@ -56,6 +67,14 @@ Keyword results carry **three distinct states**, and they are not the same thing
 Counting an unmeasured day as zero produces a false chart. The tool descriptions
 repeat this so the model does not flatten the three into one.
 
+A rank move usually has its explanation somewhere other than the rank: a version
+that shipped that day, a wave of one-star reviews, a chart drop. `get_store_page`,
+`get_reviews` and `get_charts` exist so the model can look there instead of
+explaining everything with the one number it can see.
+
+Google Play is absent from `get_charts` on purpose: Google publishes no chart
+list, so there is nothing to read and a number here would be invented.
+
 AI visibility is an **observation, not a ranking**: a model's knowledge is frozen
 at a date and the answer is not identical every time. Read the trend, not a
 single measurement.
@@ -64,7 +83,7 @@ single measurement.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `STORELIFT_API_KEY` | — | required; the server exits with a message if unset |
+| `STORELIFT_API_KEY` | — | required for tool calls; without it the server still starts and lists its tools, and every call returns an error saying how to get a key |
 | `STORELIFT_API` | `https://storelift.net` | override the API base |
 
 No dependencies — a single file speaking JSON-RPC over stdio. Runs with

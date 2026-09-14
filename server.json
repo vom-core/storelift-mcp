@@ -1,25 +1,25 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "net.storelift/storelift",
-  "description": "App Store & Google Play keyword ranks, rivals and AI visibility as an MCP server",
+  "description": "App Store & Google Play keyword ranks, rivals, reviews, charts and AI visibility as an MCP server",
   "repository": {
     "url": "https://github.com/vom-core/storelift-mcp",
     "source": "github"
   },
-  "version": "1.0.5",
+  "version": "1.1.1",
   "websiteUrl": "https://storelift.net",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "storelift-mcp",
-      "version": "1.0.5",
+      "version": "1.1.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "STORELIFT_API_KEY",
-          "description": "Storelift API key (Studio plan). Generate at Storelift -> Settings -> API keys.",
+          "description": "Storelift API key (Pro or Studio plan). Generate at Storelift -> Settings -> API keys.",
           "isRequired": true,
           "isSecret": true,
           "format": "string"
@@ -30,6 +30,20 @@
           "isRequired": false,
           "isSecret": false,
           "format": "string"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://storelift.net/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <Storelift API key> (Pro or Studio plan). Generate at Storelift -> Settings -> API keys.",
+          "isRequired": true,
+          "isSecret": true
         }
       ]
     }

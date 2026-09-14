@@ -2,7 +2,8 @@
 // Storelift MCP sunucusu.
 //
 // NE İŞE YARIYOR: Claude (ya da MCP konuşan başka bir istemci) uygulamanın
-// sıralarını, rakiplerini ve AI görünürlüğünü DOĞRUDAN okuyabiliyor.
+// sıralarını, rakiplerini, mağaza sayfasını, yorumlarını, chart yerini ve AI
+// görünürlüğünü DOĞRUDAN okuyabiliyor.
 // "Kelimece'nin TR'de düşen kelimeleri hangileri" diye sorup cevabı panoya
 // bakmadan alıyorsun.
 //
@@ -24,25 +25,31 @@ import { createRequire } from "node:module";
 
 const BASE = process.env.STORELIFT_API || "https://storelift.net";
 const KEY = process.env.STORELIFT_API_KEY;
-// Sürüm TEK YERDEN: elle yazılan serverInfo.version, package.json 1.0.1'e
-// çıkınca 1.0.0'da kalıp istemciye yanlış sürüm bildiriyordu.
+// Sürüm TEK YERDEN: elle yazılan serverInfo.version, package.json bir üst
+// yamaya çıkınca eskisinde kalıp istemciye yanlış sürüm bildiriyordu.
 const { version: VERSION } = createRequire(import.meta.url)("./package.json");
 
 // DIŞA DÖNÜK METİNLER İNGİLİZCE. Kod yorumları Türkçe (depo dili), ama araç
 // açıklamaları ve hata metinleri MCP dizinlerinde ve yabancı bir kullanıcının
 // araç panelinde görünüyor — orada Türkçe, ürünü küçültür.
+/* ⚠️ ANAHTAR YOKSA ÇIKMIYOR (2026-09-14). Eskiden `process.exit(1)` vardı:
+   Glama gibi dizinler sunucuyu anahtarsız başlatıp `tools/list` ile inceliyor;
+   süreç ilk satırda kapanınca "This server cannot be deployed" yazıyor, kalite
+   skoru çıkmıyor ve awesome-mcp-servers girişi o skoru bekliyordu. Artık
+   el sıkışma ve araç listesi anahtarsız çalışıyor; yalnız `tools/call`
+   anahtar istiyor ve eksikse aşağıdaki metinle ARAÇ HATASI dönüyor. */
 if (!KEY) {
   // ⚠️ PLAN DA YAZILIYOR. Eski metin yalnız "Settings → API keys" diyordu;
-  // Public API STUDIO'ya açık (api/index.mjs › PLANS: free/pro `api: false`).
+  // Public API PRO ve STUDIO'ya açık (api/index.mjs › PLANS: free `api: false`).
   // Ücretsiz plandaki biri o yönergeyi izleyip anahtar üretemeyince paketi
   // bozuk sanıyordu — README plan şartını söylüyordu ama çalışan program
   // söylemiyordu, ve kullanıcı README'yi değil hata metnini okuyor.
   console.error(
     "STORELIFT_API_KEY is not set.\n" +
-    "Generate one at Storelift → Settings → API keys (requires the Studio plan).\n" +
-    "https://storelift.net/pricing"
+    "Generate one at Storelift → Settings → API keys (requires the Pro or Studio plan).\n" +
+    "https://storelift.net/pricing\n" +
+    "Starting anyway: tools can be listed, but every tool call will return this error."
   );
-  process.exit(1);
 }
 
 /* Sunucunun hata KODLARI kısa ve makine için ("plan_required"). Model onu
@@ -51,12 +58,13 @@ if (!KEY) {
    cümlesine çevriliyor; çevrilmeyen kod olduğu gibi geçiyor (uydurma bir
    açıklama, hiç açıklama olmamasından kötüdür). */
 const HATA_METNI = {
-  plan_required: "The Public API is available on the Studio plan. Upgrade at https://storelift.net/pricing",
+  plan_required: "The Public API is available on the Pro and Studio plans. Upgrade at https://storelift.net/pricing",
   invalid_api_key: "This API key is not valid. Generate a new one at Storelift → Settings → API keys.",
   missing_api_key: "No API key was sent. Set STORELIFT_API_KEY in your MCP server config.",
 };
 
 async function api(path) {
+  if (!KEY) throw new Error(HATA_METNI.missing_api_key);
   const res = await fetch(BASE + path, { headers: { "x-api-key": KEY } });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(HATA_METNI[body.error] || body.error || `HTTP ${res.status}`);
@@ -126,6 +134,54 @@ const TOOLS = [
       required: ["appId"],
     },
     run: (a) => api(`/v1/apps/${a.appId}/history?country=${a.country || ""}`),
+  },
+  /* ── D4 · SIRA DIŞINDAKİ ÜÇ YÜZEY ────────────────────────────────────────
+     Sunucu beş araçla sıra tarafını anlatıyordu; mağaza sayfası, yorumlar ve
+     chart sırası paneldeydi ama burada yoktu. "Sıram neden düştü" sorusunun
+     cevabı çoğu zaman sırada değil: o gün çıkan sürüm, tek yıldızlı yorum
+     dalgası ya da chart'tan düşmek. Model o üçünü göremeyince eldeki tek
+     veriyle — sırayla — açıklamaya çalışıyor ve uyduruyor. */
+  {
+    name: "get_store_page",
+    description:
+      "The app's own store listing signals for one country: name, subtitle, version, in-app events, editorial placements, similar-apps shelves and the screenshot set (iOS), plus the Google Play page (exact install count, rating histogram, ad/IAP flags, chart badge). `timeline` lists the dated changes we detected on the listing — the cheapest explanation for a rank move. measured=false means the page was never read; it is not the same as an empty page.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/page?country=${a.country || ""}`),
+  },
+  {
+    name: "get_reviews",
+    description:
+      "Recent reviews for one country: `list` is the App Store feed, `android` the Google Play page (a narrower window, and Play publishes no review title or version). `newCount` is how many arrived since the previous measurement — null means an older record where the field was never written, which is not zero. android=null means Play was never measured; an empty list means there genuinely are no reviews.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/reviews?country=${a.country || ""}`),
+  },
+  {
+    name: "get_charts",
+    description:
+      "App Store chart position for one country: current ranks per list (free / paid / grossing, overall and in category) plus their history. Google Play is absent on purpose — Google publishes no chart list, so there is nothing to read, and a number here would be invented.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appId: { type: "string", description: "app id from list_apps" },
+        country: { type: "string", description: "country code, e.g. tr, us" },
+      },
+      required: ["appId"],
+    },
+    run: (a) => api(`/v1/apps/${a.appId}/charts?country=${a.country || ""}`),
   },
 ];
 
