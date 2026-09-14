@@ -6,13 +6,13 @@
     "url": "https://github.com/vom-core/storelift-mcp",
     "source": "github"
   },
-  "version": "1.1.1",
+  "version": "1.1.2",
   "websiteUrl": "https://storelift.net",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "storelift-mcp",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "transport": {
         "type": "stdio"
       },
