@@ -41,8 +41,8 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer <Storelift API key> (Pro or Studio plan). Generate at Storelift -> Settings -> API keys.",
-          "isRequired": true,
+          "description": "Optional: Bearer <Storelift API key> (Pro or Studio plan). Clients with MCP OAuth sign in instead.",
+          "isRequired": false,
           "isSecret": true
         }
       ]

@@ -36,8 +36,15 @@ Claude Desktop (`claude_desktop_config.json`):
 ```
 
 Hosted, with nothing to install — `https://storelift.net/mcp` over Streamable
-HTTP, same key in an `Authorization: Bearer` header (no OAuth sign-in yet, so
-the client must let you set a header):
+HTTP. Clients that support MCP authorization (Claude.ai custom connectors,
+Claude Code's `/mcp`) sign you in to Storelift with OAuth and ask you to approve
+access; no key to paste:
+
+```bash
+claude mcp add --transport http storelift https://storelift.net/mcp
+```
+
+Clients without OAuth can send the API key as a header instead:
 
 ```bash
 claude mcp add --transport http storelift https://storelift.net/mcp --header "Authorization: Bearer sl_live_..."
@@ -55,6 +62,16 @@ claude mcp add --transport http storelift https://storelift.net/mcp --header "Au
 | `get_store_page` | your own listing signals + the Google Play page, with a dated change timeline |
 | `get_reviews` | recent App Store and Google Play reviews, and how many are new since last measurement |
 | `get_charts` | App Store chart position per list, with history |
+
+## Prompts
+
+Five ready-made questions, served through `prompts/list`:
+
+- `keywords_lost_ground` — which US keywords lost ground this week, and who is above you now
+- `leader_listing` — title, subtitle and keyword field of the app ranking first on your main keyword
+- `crash_reviews` — recent reviews that mention a crash or a bug
+- `category_chart` — where your app sits in its category chart in Turkey
+- `ai_visibility` — whether assistants name your app for its category (data on the Studio plan)
 
 ## Reading the data
 

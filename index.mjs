@@ -185,6 +185,47 @@ const TOOLS = [
   },
 ];
 
+/* MCP PROMPT'LARI — araçlara eşlenmiş hazır sorular (2026-09-14).
+   Smithery taraması `prompts/list`e -32601 alınca "prompts desteklenmiyor"
+   uyarısı yazıyordu. Sorular YENİ DEĞİL: storelift.net MCP rehberindeki
+   "Questions to try first" listesi. TEK KAYNAK burası — rehber sayfası
+   (tools/seo/mcp-sayfa.mjs) ve uzak uç (api/lib/mcp-araclar.generated.mjs)
+   bu bloğu okuyor; elle ikinci kopya yok. `tools` sayfada gösteriliyor ve
+   açıklamaya giriyor; `note` yalnız sayfada, cümlenin devamı olarak. */
+const PROMPTS = [
+  {
+    name: "keywords_lost_ground",
+    title: "Keywords that lost ground",
+    text: "Which of my US keywords lost ground this week, and who is above me on them now?",
+    tools: ["get_keywords", "get_history", "get_rivals"],
+  },
+  {
+    name: "leader_listing",
+    title: "Listing of the app ranking first",
+    text: "Show me the title, subtitle and keyword field of the app ranking first on my main keyword.",
+    tools: ["get_rivals", "get_store_page"],
+  },
+  {
+    name: "crash_reviews",
+    title: "Reviews about crashes and bugs",
+    text: "Summarise my recent reviews that mention a crash or a bug.",
+    tools: ["get_reviews"],
+  },
+  {
+    name: "category_chart",
+    title: "Category chart position",
+    text: "Where does my app sit in its category chart in Turkey?",
+    tools: ["get_charts"],
+  },
+  {
+    name: "ai_visibility",
+    title: "Do assistants name my app",
+    text: "Do assistants name my app when asked about my category?",
+    tools: ["get_ai_visibility"],
+    note: "returns data on the Studio plan, where that measurement runs",
+  },
+];
+
 const send = (msg) => process.stdout.write(JSON.stringify(msg) + "\n");
 const ok = (id, result) => send({ jsonrpc: "2.0", id, result });
 const err = (id, message) => send({ jsonrpc: "2.0", id, error: { code: -32000, message } });
@@ -194,14 +235,29 @@ async function handle(req) {
   if (method === "initialize") {
     return ok(id, {
       protocolVersion: "2024-11-05",
-      capabilities: { tools: {} },
+      capabilities: { tools: {}, prompts: {} },
       serverInfo: { name: "storelift", version: VERSION },
     });
   }
   if (method === "notifications/initialized") return; // bildirim, yanıt beklemez
+  if (method === "ping") return ok(id, {});
   if (method === "tools/list") {
     return ok(id, { tools: TOOLS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) });
   }
+  if (method === "prompts/list") {
+    return ok(id, { prompts: PROMPTS.map((p) => ({ name: p.name, title: p.title, description: `${p.text} (uses ${p.tools.join(", ")})` })) });
+  }
+  if (method === "prompts/get") {
+    const p = PROMPTS.find((x) => x.name === params?.name);
+    if (!p) return send({ jsonrpc: "2.0", id, error: { code: -32602, message: `unknown prompt: ${params?.name}` } });
+    return ok(id, { description: p.title, messages: [{ role: "user", content: { type: "text", text: p.text } }] });
+  }
+  /* Kaynak (resource) YOK ve capability ilan edilmiyor — ilan etmek istemciye
+     okunacak bir şey varmış gibi boş bir panel açtırırdı. Yine de soran
+     tarayıcıya (Smithery) -32601 yerine boş liste: spesifikasyon ilan
+     edilmemiş metoda cevap vermeyi yasaklamıyor ve "hata" değil "yok" doğru. */
+  if (method === "resources/list") return ok(id, { resources: [] });
+  if (method === "resources/templates/list") return ok(id, { resourceTemplates: [] });
   if (method === "tools/call") {
     const tool = TOOLS.find((t) => t.name === params?.name);
     if (!tool) return err(id, `unknown tool: ${params?.name}`);
