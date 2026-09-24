@@ -1,5 +1,8 @@
 # storelift-mcp
 
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-net.storelift%2Fstorelift-0A7AFF)](https://registry.modelcontextprotocol.io/v0/servers?search=net.storelift/storelift&version=latest)
+[![Glama score](https://glama.ai/mcp/servers/vom-core/storelift-mcp/badges/score.svg)](https://glama.ai/mcp/servers/vom-core/storelift-mcp)
+[![Smithery](https://img.shields.io/badge/Smithery-storeliftapp%2Fstorelift-FF5601)](https://smithery.ai/servers/storeliftapp/storelift)
 [![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/vom-core/storelift-mcp)
 
 App Store & Google Play ranking data as an MCP server. Ask your assistant which
