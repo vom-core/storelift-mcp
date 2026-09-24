@@ -111,7 +111,7 @@ const TOOLS = [
   {
     name: "get_ai_visibility",
     description:
-      "Whether AI assistants name this app when asked natural questions about its category — reported per engine (Claude / ChatGPT / Gemini), never averaged. This is an OBSERVATION, not a ranking: a model's knowledge is frozen at a date and the answer is not identical every time, so read the trend rather than a single measurement.",
+      "Whether AI assistants name this app when asked natural questions about its category — reported per engine (Claude / ChatGPT / Gemini), never averaged. `engines` holds each measured engine's answers; `providers` gives every engine's state — measured, failed, or not_measured (no data yet, which is NOT a zero). This is an OBSERVATION, not a ranking: a model's knowledge is frozen at a date and the answer is not identical every time, so read the trend rather than a single measurement.",
     inputSchema: {
       type: "object",
       properties: {
@@ -144,7 +144,7 @@ const TOOLS = [
   {
     name: "get_store_page",
     description:
-      "The app's own store listing signals for one country: name, subtitle, version, in-app events, editorial placements, similar-apps shelves and the screenshot set (iOS), plus the Google Play page (exact install count, rating histogram, ad/IAP flags, chart badge). `timeline` lists the dated changes we detected on the listing — the cheapest explanation for a rank move. measured=false means the page was never read; it is not the same as an empty page.",
+      "The app's own store listing signals for one country (name and subtitle are not included): version, in-app events, editorial placements, similar-apps shelves and the screenshot set (iOS), plus the Google Play page (exact install count, rating histogram, ad/IAP flags, chart badge). `timeline` lists the dated changes we detected on the listing — the cheapest explanation for a rank move. measured=false means the page was never read; it is not the same as an empty page.",
     inputSchema: {
       type: "object",
       properties: {
@@ -201,8 +201,10 @@ const PROMPTS = [
   },
   {
     name: "leader_listing",
-    title: "Listing of the app ranking first",
-    text: "Show me the title, subtitle and keyword field of the app ranking first on my main keyword.",
+    // Eski soru rakibin başlık/kelime alanını istiyordu; get_store_page yalnız
+    // KENDİ uygulamanın sayfasını döndürür, kelime alanı hiç yok (DENETIM 2026-09-18 L-P0-15).
+    title: "Who is ahead on my main keyword",
+    text: "Which apps rank above me on my main keyword, and what do their names have in common?",
     tools: ["get_rivals", "get_store_page"],
   },
   {

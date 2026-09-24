@@ -1,5 +1,7 @@
 # storelift-mcp
 
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/vom-core/storelift-mcp)
+
 App Store & Google Play ranking data as an MCP server. Ask your assistant which
 keywords you dropped on, who outranks you, and whether AI assistants mention
 your app at all — without opening a dashboard.
