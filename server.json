@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "net.storelift/storelift",
-  "description": "App Store & Google Play keyword ranks, rivals, store pages, reviews, charts and AI visibility as an MCP server",
+  "description": "App Store & Google Play keyword ranks, rivals, store pages, reviews, charts and AI visibility",
   "repository": {
     "url": "https://github.com/vom-core/storelift-mcp",
     "source": "github"
