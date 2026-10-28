@@ -1,18 +1,18 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "net.storelift/storelift",
-  "description": "App Store & Google Play keyword ranks, rivals, store pages, reviews, charts and AI visibility",
+  "description": "App Store & Google Play keyword ranks, rivals, reviews and AI visibility. Free plan included.",
   "repository": {
     "url": "https://github.com/vom-core/storelift-mcp",
     "source": "github"
   },
-  "version": "1.5.0",
+  "version": "1.5.1",
   "websiteUrl": "https://storelift.net",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "storelift-mcp",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "transport": {
         "type": "stdio"
       },

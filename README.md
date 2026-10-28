@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://storelift.net/"><img src="assets/logo.png" alt="Storelift logo" width="96" height="96"></a>
+  <a href="https://storelift.net/"><img src="https://raw.githubusercontent.com/vom-core/storelift-mcp/main/assets/logo.png" alt="Storelift logo" width="96" height="96"></a>
 </p>
 
 # Storelift MCP server
@@ -261,7 +261,7 @@ Generated from the sandbox data set of 2026-09-28: a test key (`sl_test_…`) an
 
 ### Ask who ranks above you
 
-Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.1.1 and later; the test key and the note that closes a result need version 1.5.0 of the server.
+Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · needs storelift-mcp 1.5.0 and version 1.5.0 of the server.
 
 The call the client sends:
 
