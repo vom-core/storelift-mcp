@@ -9,7 +9,7 @@
 [![Smithery](https://img.shields.io/badge/Smithery-storeliftapp%2Fstorelift-FF5601)](https://smithery.ai/servers/storeliftapp/storelift)
 [![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/vom-core/storelift-mcp)
 
-Storelift MCP server: App Store and Google Play keyword rank tracking for Claude, ChatGPT, Cursor and any MCP client. The remote server is included on every Storelift plan, including Free (1 app, 25 keywords in each of 2 storefronts, no end date).
+Storelift MCP server: App Store and Google Play keyword rank tracking for Claude, ChatGPT, Cursor and any MCP client. The remote server is included on Pro and Studio; the Free plan (1 app, 10 keywords in each of 2 storefronts, no end date) does not include MCP or the API.
 
 Ask your assistant which keywords you dropped on, who outranks you, what your
 reviews say and how your listing changed, without opening a dashboard. The
@@ -27,16 +27,16 @@ Apple Ads budgets) is previewed first and applied only after you confirm it.
 
 | | Free | Pro | Studio |
 |---|---|---|---|
-| Price | $0, no card, no end date | $20/month or $200/year | $60/month or $600/year |
+| Price | $0, no card, no end date | $29/month or $290/year | $99/month or $990/year |
 | Apps | 1 | 5 | Unlimited |
-| Tracked keywords (keyword × storefront) | 25 in each of 2 storefronts (50) | 2,500 | 10,000 |
+| Tracked keywords (keyword × storefront) | 10 in each of 2 storefronts (20) | 1,000 | 10,000 |
 | Storefronts per app | 2 | All 175 | All 175 |
-| Keyword rank history | 30 days | 6 months | 1 year |
-| Seats | 1 | 3 | 10 |
-| Remote MCP server (`https://storelift.net/mcp`) | Included | Included | Included |
+| History (ranks, charts, app timeline, reviews) | 14 days | 9 months | Up to 18 months |
+| Seats | 1 | 1 | 10 |
+| Remote MCP server (`https://storelift.net/mcp`) | Not included | Included | Included |
 | Public API and local MCP server (`npx storelift-mcp`) | Not included | Included | Included |
-| AI visibility runs a month (panel) | 0 | 3 | 60 |
-| AI visibility through MCP (`ai:read`) | Not included | Not included | Included |
+| AI visibility runs a month (panel, MCP and API) | 0 | 3 | 60 |
+| AI visibility through MCP (`ai:read`) | Not included | Included | Included |
 
 Enterprise (contact us) adds 25,000 tracked keywords, 25 seats and 180 AI
 visibility runs a month. Plan details and the 7-day Pro trial terms are on the
@@ -44,22 +44,22 @@ visibility runs a month. Plan details and the 7-day Pro trial terms are on the
 
 ## Requirements
 
-- Remote MCP sign-in (OAuth) is available on every plan, including Free. The
-  tool list is filtered by the plan, granted scopes and available credits.
-- Free includes one live API key that works on the remote MCP server only.
+- Remote MCP sign-in (OAuth) is available on Pro and above. The tool list is filtered
+  by the plan, granted scopes and available credits. Credit packs are sold on paid
+  plans; a Free account that already bought a credit balance keeps using it until it
+  runs out.
 - The local stdio server needs a live API key: Storelift → Settings → API keys.
   Live keys for the local server and the public API are available on Pro, Studio
-  and Enterprise, and on eligible Free accounts with purchased API credits or an
-  active Explorer package. A sandbox key (`sl_test_`) returns sample data and is
+  and Enterprise. A sandbox key (`sl_test_`) returns sample data and is
   not a live-data credential.
 - The local server needs Node.js 18 or later.
-- AI visibility MCP tools require **Studio or Enterprise** and the `ai:read`
-  scope. Pro's AI visibility runs in the Storelift panel are a separate
-  allowance and do not open these tools.
+- AI visibility MCP tools require **Pro, Studio or Enterprise** and the
+  `ai:read` scope. Runs started through MCP or the API come out of the same
+  monthly allowance as the panel (3 on Pro, 60 on Studio).
 
 ## Install
 
-### Remote server (every plan, nothing to install)
+### Remote server (Pro and above, nothing to install)
 
 Endpoint: `https://storelift.net/mcp` over Streamable HTTP. Clients that
 support MCP authorization sign you in to Storelift with OAuth and ask you to
@@ -132,8 +132,8 @@ storelift-mcp 1.5.0 and the remote endpoint carry the same 85 tools.
 | `list_apps` | tracked apps (id, name, countries, keywords) |
 | `get_keywords` | keyword ranks for one app in one country |
 | `get_rivals` | apps ranking **above** you, with their rank and yours |
-| `get_ai_visibility` | a dated sample of answers per measured engine; Studio/Enterprise and `ai:read` required; not what every user sees |
-| `run_ai_visibility_check` | starts an AI visibility sample using an available AI visibility run; Studio/Enterprise and `ai:read` required |
+| `get_ai_visibility` | a dated sample of AI assistant answers that name or skip your app; Pro or a higher plan and `ai:read` required; not what every user sees |
+| `run_ai_visibility_check` | starts an AI visibility sample using one run of the dashboard's monthly allowance; Pro or a higher plan and `ai:read` required |
 | `get_history` | rank history, `[day, rank]` points |
 | `get_store_page` | your own listing signals (languages, star breakdown, in-app events, promotional text, featured in-app purchases) + the Google Play page, with a dated change timeline |
 | `get_reviews` | recent App Store and Google Play reviews, and how many are new since last measurement |
@@ -251,7 +251,7 @@ Six ready-made questions, served through `prompts/list`:
 - `leader_listing` — title, subtitle and keyword field of the app ranking first on your main keyword
 - `crash_reviews` — recent reviews that mention a crash or a bug
 - `category_chart` — where your app sits in its category chart in Turkey
-- `ai_visibility` — whether assistants name your app for its category (data on the Studio plan)
+- `ai_visibility` — whether assistants name your app for its category (Pro, Studio or Enterprise with the `ai:read` scope)
 - `weekly_aso_review` — this week's plan, the keywords that moved and who is ahead of you on them
 
 <!-- examples:start (generated, do not edit: node tools/growth/integration-examples.mjs --write) -->
@@ -261,7 +261,7 @@ Generated from the sandbox data set of 2026-09-28: a test key (`sl_test_…`) an
 
 ### Ask who ranks above you
 
-Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · needs storelift-mcp 1.5.0 and version 1.5.0 of the server.
+Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.1); the test key and the note that closes a result need version 1.5.1 of the server.
 
 The call the client sends:
 
@@ -302,7 +302,7 @@ The first part of the result (`content[0].text`); `rivals` shows 2 of 3 rows:
 
 ### See what a credential can read
 
-Tool: `whoami` · no scope · 0 credits · needs storelift-mcp 1.5.0 and version 1.5.0 of the server. Over HTTP the same answer is `GET /v1/account`.
+Tool: `whoami` · no scope · 0 credits · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.1); the test key and the note that closes a result need version 1.5.1 of the server. Over HTTP the same answer is `GET /v1/account`.
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"whoami","arguments":{}}}

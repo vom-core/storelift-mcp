@@ -72,7 +72,7 @@ if (!KEY) {
    cümlesine çevriliyor; çevrilmeyen kod olduğu gibi geçiyor (uydurma bir
    açıklama, hiç açıklama olmamasından kötüdür). */
 const HATA_METNI = {
-  plan_required: "Live API keys are on the Pro plan and above; MCP over OAuth works on every plan. Upgrade at https://storelift.net/pricing",
+  plan_required: "The Storelift API and MCP are on the Pro plan and above. Upgrade at https://storelift.net/pricing",
   invalid_api_key: "This API key is not valid. Generate a new one at Storelift → Settings → API keys.",
   missing_api_key: "No API key was sent. Set STORELIFT_API_KEY in your MCP server config.",
   key_expired: "This API key has expired. Create a new one at Storelift → Settings → API keys.",
@@ -199,7 +199,7 @@ const TOOLS = [
     name: "get_ai_visibility",
     scope: "ai:read", credits: 1, title: "AI visibility results",
     description:
-      "App mentions in a dated sample of AI engine answers; this does not reproduce what ChatGPT, Claude or Gemini show each user. The ai:read scope is required. `engines` holds each measured engine's answers; `providers` gives measured, failed or not_measured states. An unavailable engine is not a zero score. Read the dated sample and its question count; it is not a universal ranking or a measure of all consumer answers.",
+      "App mentions in a dated sample of AI assistant answers; this does not reproduce what every user sees. The ai:read scope is required. A question that could not be asked is not a zero score. Read the dated sample and its question count; it is not a universal ranking or a measure of all consumer answers.",
     inputSchema: {
       type: "object",
       properties: {
@@ -214,7 +214,7 @@ const TOOLS = [
     name: "run_ai_visibility_check",
     scope: "ai:read", credits: 1, harcar: true, openWorld: true, title: "Run AI visibility check",
     description:
-      "Start an AI visibility sample for one app in one country, with the engines available for the run. Requires the ai:read scope. Uses one AI visibility run from the workspace's allowance; get_ai_visibility returns the result. One measurement per app runs at a time.",
+      "Start an AI visibility sample for one app in one country. Requires the ai:read scope. Uses one AI visibility run from the workspace's allowance; get_ai_visibility returns the result. One measurement per app runs at a time.",
     inputSchema: {
       type: "object",
       properties: {
@@ -329,7 +329,7 @@ const TOOLS = [
         appId: { type: "string", description: "app id from list_apps" },
         country: { type: "string", description: "country code, e.g. tr, us (defaults to the app's first country)" },
         platform: { type: "string", enum: ["ios", "android"], description: "defaults to ios" },
-        days: { type: "number", description: "last N days, up to 365 (default 90)" },
+        days: { type: "number", description: "last N days, up to the plan's history window (default 90)" },
         from: { type: "string", description: "first day, YYYY-MM-DD (overrides days)" },
         to: { type: "string", description: "last day, YYYY-MM-DD" },
       },
@@ -609,7 +609,7 @@ const TOOLS = [
     name: "get_chart_movers",
     scope: "apps:read", credits: 1, title: "Category chart movers",
     description:
-      "Who moved in the app's own category chart: risers and fallers (3+ places), new entrants and drop-outs, with names, plus where the app itself and its chosen rivals stood on both days. The category comes from the app's chart record; pass genre to look at another.",
+      "Who moved in the app's own category chart: risers and fallers (3+ places), new entrants and drop-outs, with names, plus where the app itself and its chosen rivals stood on both days. The category comes from the app's chart record; pass genre to look at another. On Free, moves within the top 5 chart positions are open (the app's own place always is); the rest come only as a count in locked.moves.",
     inputSchema: {
       type: "object",
       properties: {
@@ -722,7 +722,7 @@ const TOOLS = [
       type: "object",
       properties: {
         appId: { type: "string", description: "app id from list_apps" },
-        days: { type: "integer", description: "how many days of daily series to return, 1–365 (default 90)" },
+        days: { type: "integer", description: "how many days of daily series to return, from 1 up to the plan's history window (default 90)" },
       },
       required: ["appId"],
     },
@@ -736,7 +736,7 @@ const TOOLS = [
       type: "object",
       properties: {
         appId: { type: "string", description: "app id from list_apps" },
-        days: { type: "integer", description: "window in days, 1–365 (default 90)" },
+        days: { type: "integer", description: "window in days, from 1 up to the plan's history window (default 90)" },
       },
       required: ["appId"],
     },
@@ -750,7 +750,7 @@ const TOOLS = [
       type: "object",
       properties: {
         appId: { type: "string", description: "app id from list_apps" },
-        days: { type: "integer", description: "history window in days, 1–365 (default 90)" },
+        days: { type: "integer", description: "history window in days, from 1 up to the plan's history window (default 90)" },
       },
       required: ["appId"],
     },
@@ -835,7 +835,7 @@ const TOOLS = [
     name: "get_pricing_offers",
     scope: "revenue:read", credits: 1, title: "Prices and offer codes",
     description:
-      "Product prices and offer codes for one app from the RevenueCat or Adapty webhook, over the last 365 days: per product and country, the price in force now (currency, local price, since when) and every fixed-price period with its trial starts, new paid subscriptions, trial conversions and revenue, plus each offer code with its first and last day and redemptions. A price change shows up as a new period, so before/after is read period by period. connected=false means neither webhook is connected.",
+      "Product prices and offer codes for one app from the RevenueCat or Adapty webhook, over the plan's history window (9 months on Pro, up to 18 months on Studio; history.days and history.since give the exact window): per product and country, the price in force now (currency, local price, since when) and every fixed-price period with its trial starts, new paid subscriptions, trial conversions and revenue, plus each offer code with its first and last day and redemptions. A price change shows up as a new period, so before/after is read period by period. connected=false means neither webhook is connected.",
     inputSchema: {
       type: "object",
       properties: {
@@ -884,7 +884,7 @@ const TOOLS = [
     name: "get_weekly_plan",
     scope: "apps:read", credits: 1, title: "Weekly listing plan",
     description:
-      "This week's listing suggestions for the app — the same list as the dashboard's \"This week\" card, best first. A suggestion only appears when it passes strict checks: a keyword goes into the title or subtitle only if it is a core, high-demand term of the app's niche, the app already ranks #4–15 for it, rival apps above carry it in their name and it fits without dropping the brand or anything that ranks; niche or long-tail keywords go to the keyword field at most, only when there is room; other categories, other languages and keywords the user turned down never appear; nothing is suggested while a recent listing change is still settling (settling says until when). Each task has the sentence, the current and proposed text, the words it adds and removes, the reasons (measured facts), the trade-off and a confidence. Without country, all storefronts are merged and the same change is one task with its countries. Often empty — that is on purpose.",
+      "This week's listing suggestions for the app — the same list as the dashboard's \"This week\" card, best first. A suggestion only appears when it passes strict checks: a keyword goes into the title or subtitle only if it is a core, high-demand term of the app's niche, the app already ranks #4–15 for it, rival apps above carry it in their name and it fits without dropping the brand or anything that ranks; niche or long-tail keywords go to the keyword field at most, only when there is room; other categories, other languages and keywords the user turned down never appear; nothing is suggested while a recent listing change is still settling (settling says until when). Each task has the sentence, the current and proposed text, the words it adds and removes, the reasons (measured facts), the trade-off and a confidence. Without country, all storefronts are merged and the same change is one task with its countries. Often empty — that is on purpose. On Free, the first 3 tasks are open and the rest come only as a count in locked.tasks.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1499,7 +1499,7 @@ const PROMPTS = [
     text: "Do assistants name my app when asked about my category?",
     tools: ["get_ai_visibility", "run_ai_visibility_check"],
     arguments: PROMPT_ARGS,
-    note: "reads dated samples of AI engine answers, not what every user sees; these MCP tools require the ai:read scope. A new run uses the workspace's available AI visibility allowance.",
+    note: "reads dated samples of AI assistant answers, not what every user sees; these MCP tools require the ai:read scope. A new run uses the workspace's available AI visibility allowance.",
   },
   {
     /* dev-home "Try a prompt" (gap-g5-g6-g8 › dev-home): haftalık ASO turu —
