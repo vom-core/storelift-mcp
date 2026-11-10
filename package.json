@@ -1,6 +1,6 @@
 {
   "name": "storelift-mcp",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "mcpName": "net.storelift/storelift",
   "description": "App Store & Google Play keyword ranks, rivals, store pages, reviews, charts and AI visibility as an MCP server. The remote server is included on Storelift Pro and Studio.",
   "type": "module",

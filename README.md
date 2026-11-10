@@ -6,7 +6,6 @@
 
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-net.storelift%2Fstorelift-0A7AFF)](https://registry.modelcontextprotocol.io/v0/servers?search=net.storelift/storelift&version=latest)
 [![Glama score](https://glama.ai/mcp/servers/vom-core/storelift-mcp/badges/score.svg)](https://glama.ai/mcp/servers/vom-core/storelift-mcp)
-[![Smithery](https://img.shields.io/badge/Smithery-storeliftapp%2Fstorelift-FF5601)](https://smithery.ai/servers/storeliftapp/storelift)
 [![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/vom-core/storelift-mcp)
 
 Storelift MCP server: App Store and Google Play keyword rank tracking for Claude, ChatGPT, Cursor and any MCP client. The remote server is included on Pro and Studio; the Free plan (1 app, 10 keywords in each of 2 storefronts, no end date) does not include MCP or the API.
@@ -261,7 +260,7 @@ Generated from the sandbox data set of 2026-09-28: a test key (`sl_test_…`) an
 
 ### Ask who ranks above you
 
-Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.1); the test key and the note that closes a result need version 1.5.1 of the server.
+Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.2); the test key and the note that closes a result need version 1.5.2 of the server.
 
 The call the client sends:
 
@@ -302,7 +301,7 @@ The first part of the result (`content[0].text`); `rivals` shows 2 of 3 rows:
 
 ### See what a credential can read
 
-Tool: `whoami` · no scope · 0 credits · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.1); the test key and the note that closes a result need version 1.5.1 of the server. Over HTTP the same answer is `GET /v1/account`.
+Tool: `whoami` · no scope · 0 credits · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.2); the test key and the note that closes a result need version 1.5.2 of the server. Over HTTP the same answer is `GET /v1/account`.
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"whoami","arguments":{}}}
