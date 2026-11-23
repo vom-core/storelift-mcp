@@ -221,7 +221,7 @@ test keys (`sl_test_`) never write.
 | `remove_keywords` | stop tracking keywords (measured history stays) | `track:write` |
 | `add_rivals` | add manual competitors (`ios:<id>` / `android:<pkg>`) | `track:write` |
 | `remove_rivals` | remove manual competitors | `track:write` |
-| `create_share_link` | public read-only dashboard link, 1–30 days, optional password | `reports:write` |
+| `create_share_link` | public read-only dashboard link for 1–30 days (default 30) or no expiry (`days: 0`, open until revoked), optional password | `reports:write` |
 | `export_data` | keywords, rank history or reviews as CSV / JSON → a 7-day download link (20 credits, Pro) | `reports:write` |
 | `mark_alerts_read` | mark alerts read (or unread again) — all, one app's, or up to a date | `track:write` |
 | `create_alert_rule` | turn on an alert rule (rank drop by N, rival passed, rival listing change, …) and its channels | `track:write` |
@@ -260,7 +260,7 @@ Generated from the sandbox data set of 2026-09-28: a test key (`sl_test_…`) an
 
 ### Ask who ranks above you
 
-Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.2); the test key and the note that closes a result need version 1.5.2 of the server.
+Tools: `list_apps` → `get_rivals` · scope `apps:read` · 2 credits with a live credential · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.6.0); the test key and the note that closes a result need version 1.6.0 of the server.
 
 The call the client sends:
 
@@ -301,7 +301,7 @@ The first part of the result (`content[0].text`); `rivals` shows 2 of 3 rows:
 
 ### See what a credential can read
 
-Tool: `whoami` · no scope · 0 credits · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.5.2); the test key and the note that closes a result need version 1.5.2 of the server. Over HTTP the same answer is `GET /v1/account`.
+Tool: `whoami` · no scope · 0 credits · tools in storelift-mcp 1.5.0 and later (current package: storelift-mcp 1.6.0); the test key and the note that closes a result need version 1.6.0 of the server. Over HTTP the same answer is `GET /v1/account`.
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"whoami","arguments":{}}}

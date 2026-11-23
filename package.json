@@ -1,17 +1,19 @@
 {
   "name": "storelift-mcp",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "mcpName": "net.storelift/storelift",
   "description": "App Store & Google Play keyword ranks, rivals, store pages, reviews, charts and AI visibility as an MCP server. The remote server is included on Storelift Pro and Studio.",
   "type": "module",
   "bin": {
-    "storelift-mcp": "index.mjs"
+    "storelift-mcp": "index.mjs",
+    "storelift": "cli.mjs"
   },
   "scripts": {
-    "build": "node --check index.mjs"
+    "build": "node --check index.mjs && node --check cli.mjs"
   },
   "files": [
     "index.mjs",
+    "cli.mjs",
     "README.md",
     "LICENSE"
   ],
